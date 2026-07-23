@@ -1,22 +1,23 @@
 -- ============================================================
--- FICHIER 02 : Window Functions – Les bases
+-- FILE 02: Window Functions – The basics
 -- ============================================================
--- Dataset : transactions bancaires fictives (5 clients, 3 mois) (CTE)
--- Objectif : utiliser les Window functions sur des cas d'usage financiers concrets.
+-- Dataset: fictional banking transactions (5 clients, 3 months) (CTE)
+-- Objective: use window functions on concrete financial use cases.
 --
--- 💡 Pour exécuter : copier UNE requête à la fois dans BigQuery,
---    depuis le CTE "transactions" disponible dans le fichier 01_dataset_transactions.sql jusqu'au SELECT final disponible dans ce fichier.
+-- 💡 To run: copy ONE query at a time into BigQuery,
+--    starting from the "transactions" CTE available in file 01_dataset_transactions.sql
+--    down to the final SELECT available in this file.
 -- ============================================================
 
 
 -- ─────────────────────────────────────────────────────────────
--- REQUÊTE 1 : Enrichir les informations de transaction bancaire de client dans la table via des fonctions windows
+-- QUERY 1: Enrich each client's banking transaction data using window functions
 -- ─────────────────────────────────────────────────────────────
--- Cas d'usage : 
---    - Trier et compter les transactions de chaque client pour étudier leur comportement d'achat
---    - Isoler la date de la 1ère et la dernière transaction de chaque client pour étudier la durée de la relation client
---    - Solde cumulé du client lors de la transaction pour détecter les pics de dépenses
---    - Rythme de dépense du client (jours entre 2 transactions) pour détecter les clients inactifs ou les changements de comportement
+-- Use case:
+--    - Sort and count each client's transactions to study their spending behavior
+--    - Identify each client's first and last transaction date to study relationship duration
+--    - Running balance at the time of each transaction to detect spending spikes
+--    - Client spending rhythm (days between 2 transactions) to detect inactive clients or behavior changes
 
 
 
@@ -24,39 +25,38 @@
 SELECT
   client_id,
   transaction_id,
-  date_transaction,
-  montant,
+  transaction_date,
+  amount,
 
-  -- Position de la transaction dans l'historique du client (1 = la plus ancienne)
-  ROW_NUMBER() OVER w_client AS numero_transaction,
+  -- Position of the transaction in the client's history (1 = oldest)
+  ROW_NUMBER() OVER w_client AS transaction_number,
 
-  -- Nombre total de transactions connues pour ce client
+  -- Total number of known transactions for this client
   COUNT(*) OVER w_client_total AS nb_transactions,
 
-  -- Dates première et dernière transaction
-  MIN(date_transaction) OVER w_client_total AS date_premiere_txn,
-  MAX(date_transaction) OVER w_client_total AS date_derniere_txn,
+  -- First and last transaction dates
+  MIN(transaction_date) OVER w_client_total AS first_transaction_date,
+  MAX(transaction_date) OVER w_client_total AS last_transaction_date,
 
-  -- Solde cumulé transaction par transaction pour détecter les pics de dépenses
-  ROUND(SUM(montant) OVER w_solde, 2) AS solde_cumule,
+  -- Running balance transaction by transaction, to detect spending spikes
+  ROUND(SUM(amount) OVER w_balance, 2) AS running_balance,
 
-  -- Montant de la transaction précédente du même client (pour détecter les sauts)
-  LAG(montant) OVER w_client AS montant_precedent,
+  -- Amount of the same client's previous transaction (to detect jumps)
+  LAG(amount) OVER w_client AS previous_amount,
 
-  -- Jours écoulés depuis la transaction précédente (rythme de dépense)
+  -- Days elapsed since the previous transaction (spending rhythm)
   DATE_DIFF(
-    date_transaction,
-    LAG(date_transaction) OVER w_client,
+    transaction_date,
+    LAG(transaction_date) OVER w_client,
     DAY
-  ) AS jours_depuis_precedente_txn
+  ) AS days_since_previous_txn
 
 FROM transactions
 
-WINDOW 
-  w_client       AS (PARTITION BY client_id ORDER BY date_transaction ASC),
+WINDOW
+  w_client       AS (PARTITION BY client_id ORDER BY transaction_date ASC),
   w_client_total AS (PARTITION BY client_id),
-  w_solde         AS (PARTITION BY client_id ORDER BY date_transaction ASC
-                      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+  w_balance      AS (PARTITION BY client_id ORDER BY transaction_date ASC
+                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 
-ORDER BY client_id, date_transaction;
-
+ORDER BY client_id, transaction_date;
