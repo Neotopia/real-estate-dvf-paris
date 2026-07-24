@@ -1,0 +1,6 @@
+# dbt is intentionally kept in its own requirements file: it pulls a lot of
+# dependencies and is best installed in a dedicated virtual environment,
+# separate from the lightweight scripts/requirements.txt used by the
+# Python extract-load script.
+dbt-core>=1.7
+dbt-bigquery>=1.7

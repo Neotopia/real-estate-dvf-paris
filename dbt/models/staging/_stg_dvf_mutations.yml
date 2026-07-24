@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: stg_dvf_mutations
+    description: >
+      One row per cleaned residential property sale (apartments and
+      houses only), Paris + petite couronne, 2020-2025. Deduplicated,
+      filtered to valid sales with a positive price and surface.
+    columns:
+      - name: mutation_id
+        description: Unique identifier of the mutation (sale).
+        tests:
+          - not_null
+
+      - name: sale_date
+        description: Date the sale was recorded.
+        tests:
+          - not_null
+
+      - name: sale_price
+        description: Sale price in euros.
+        tests:
+          - not_null
+
+      - name: property_type
+        description: Type of residential property.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Appartement", "Maison"]
+
+      - name: department_code
+        description: Department code (75, 92, 93, 94).
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["75", "92", "93", "94"]
+
+      - name: built_surface_m2
+        description: Built area in square meters.
+        tests:
+          - not_null
+
+      - name: price_per_m2
+        description: sale_price / built_surface_m2, rounded to 2 decimals.
+        tests:
+          - not_null

@@ -1,0 +1,16 @@
+# Raw DVF data (large files, downloaded via scripts/download_and_load.py)
+data/
+*.csv
+*.csv.gz
+
+# Local environment config (contains your real project id) — never commit this.
+# .env.example is the tracked template; only the real .env is ignored.
+.env
+
+# OS / editor noise
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.pyc

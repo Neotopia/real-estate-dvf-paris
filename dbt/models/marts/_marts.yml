@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: mart_price_per_m2_by_commune
+    description: Average / median / min / max price per m² by commune and property type.
+    columns:
+      - name: commune_code
+        tests:
+          - not_null
+      - name: nb_sales
+        tests:
+          - not_null
+
+  - name: mart_price_evolution_by_year
+    description: Year-over-year average price per m² by department and property type.
+    columns:
+      - name: sale_year
+        tests:
+          - not_null
+
+  - name: mart_paris_vs_petite_couronne
+    description: Paris vs petite couronne comparison on price and market activity.
+    columns:
+      - name: zone
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Paris", "Petite couronne"]

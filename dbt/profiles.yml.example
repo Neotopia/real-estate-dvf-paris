@@ -1,0 +1,29 @@
+# ============================================================
+# dbt profile template for this project
+# ============================================================
+# dbt profiles are NOT stored inside the project by convention (they can
+# contain credentials), so copy this file to your dbt profiles directory:
+#
+#     mkdir -p ~/.dbt
+#     cp dbt/profiles.yml.example ~/.dbt/profiles.yml
+#
+# Then edit ~/.dbt/profiles.yml and replace "your-sandbox-project-id"
+# with the same BQ_PROJECT_ID you used in your .env file.
+#
+# Authentication: method "oauth" reuses the credentials created by
+#     gcloud auth application-default login
+# (the same command used by scripts/download_and_load.py) — no service
+# account key needed, and it works with BigQuery Sandbox.
+# ============================================================
+
+dvf_paris:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: your-sandbox-project-id
+      dataset: dvf_immobilier
+      location: EU
+      threads: 4
+      timeout_seconds: 300

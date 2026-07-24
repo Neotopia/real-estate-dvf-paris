@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: dvf_raw
+    description: >
+      Raw geo-DVF data, loaded as-is (no cleaning) by
+      scripts/download_and_load.py.
+    # No "database" key: dbt defaults to the project set in your
+    # profiles.yml (BQ_PROJECT_ID), so no env var needs to be exported
+    # just to run dbt.
+    schema: dvf_immobilier
+    tables:
+      - name: raw_mutations_idf
+        description: >
+          One row per property mutation line as published by Etalab,
+          for Paris + petite couronne (75, 92, 93, 94), 2020-2025.
+        loaded_at_field: date_mutation
