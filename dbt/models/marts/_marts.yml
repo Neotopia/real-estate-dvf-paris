@@ -4,19 +4,57 @@ models:
   - name: mart_price_per_m2_by_commune
     description: Average / median / min / max price per m² by commune and property type.
     columns:
+      - name: department_code
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["75", "92", "93", "94"]
       - name: commune_code
         tests:
           - not_null
+      - name: property_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Appartement", "Maison"]
       - name: nb_sales
         tests:
           - not_null
+      - name: avg_price_per_m2
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - department_code
+            - commune_code
+            - property_type
 
   - name: mart_price_evolution_by_year
     description: Year-over-year average price per m² by department and property type.
     columns:
+      - name: department_code
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["75", "92", "93", "94"]
       - name: sale_year
         tests:
           - not_null
+      - name: property_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Appartement", "Maison"]
+      - name: avg_price_per_m2
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - department_code
+            - sale_year
+            - property_type
 
   - name: mart_paris_vs_petite_couronne
     description: Paris vs petite couronne comparison on price and market activity.
@@ -26,3 +64,93 @@ models:
           - not_null
           - accepted_values:
               values: ["Paris", "Petite couronne"]
+      - name: sale_year
+        tests:
+          - not_null
+      - name: property_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Appartement", "Maison"]
+      - name: avg_price_per_m2
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - zone
+            - sale_year
+            - property_type
+
+  - name: mart_top_communes_by_price
+    description: >
+      Communes ranked by average price per m² and by sales volume,
+      within their own department (min. 20 sales to qualify, to avoid
+      small-sample outliers looking like the "most expensive" commune).
+    columns:
+      - name: department_code
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["75", "92", "93", "94"]
+      - name: commune_code
+        tests:
+          - not_null
+      - name: nb_sales
+        tests:
+          - not_null
+      - name: price_rank_in_department
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - department_code
+            - commune_code
+            - property_type
+
+  - name: mart_price_by_surface_bucket
+    description: >
+      Average price per m², sale price, and surface, broken down by
+      zone, property type, and surface-bucket category (studio/T2/T3/T4/T5+).
+    columns:
+      - name: zone
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Paris", "Petite couronne"]
+      - name: surface_bucket
+        tests:
+          - not_null
+      - name: nb_sales
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - zone
+            - property_type
+            - surface_bucket
+
+  - name: mart_seasonality_by_month
+    description: >
+      Sales volume and average price per m² by calendar month
+      (aggregated across all years in scope), to spot seasonal patterns.
+    columns:
+      - name: department_code
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["75", "92", "93", "94"]
+      - name: sale_month
+        tests:
+          - not_null
+      - name: nb_sales
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - department_code
+            - property_type
+            - sale_month
