@@ -14,3 +14,8 @@ data/
 # Python
 __pycache__/
 *.pyc
+
+# dbt
+dbt/dbt_packages/
+dbt/target/
+dbt/logs/

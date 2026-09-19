@@ -45,3 +45,27 @@ models:
         description: sale_price / built_surface_m2, rounded to 2 decimals.
         tests:
           - not_null
+
+      - name: sale_year
+        description: Calendar year extracted from sale_date.
+        tests:
+          - not_null
+
+      - name: nb_rooms
+        description: Number of main rooms (nombre_pieces_principales).
+        tests:
+          - not_null:
+              config:
+                severity: warn
+                # warn (not error): some legitimate DVF rows (e.g. some
+                # Maison sales) legitimately have a null room count.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - mutation_id
+            - street_number
+            - street_name
+            - built_surface_m2
+          config:
+            severity: error

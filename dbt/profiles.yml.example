@@ -14,12 +14,24 @@
 #     gcloud auth application-default login
 # (the same command used by scripts/download_and_load.py) — no service
 # account key needed, and it works with BigQuery Sandbox.
+#
+# "dev" (default) and "prod" targets write to differently-prefixed
+# schemas — see macros/generate_schema_name.sql.
 # ============================================================
 
 dvf_paris:
   target: dev
   outputs:
     dev:
+      type: bigquery
+      method: oauth
+      project: your-sandbox-project-id
+      dataset: dvf_immobilier
+      location: EU
+      threads: 4
+      timeout_seconds: 300
+
+    prod:
       type: bigquery
       method: oauth
       project: your-sandbox-project-id

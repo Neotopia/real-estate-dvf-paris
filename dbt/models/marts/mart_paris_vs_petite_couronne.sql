@@ -3,17 +3,14 @@
 -- ============================================================
 -- Business question: how does Paris (75) compare to the petite
 -- couronne (92, 93, 94) on price and market activity?
+--
+-- zone is computed once in int_dvf_sales_enriched (dvf_zone macro)
+-- instead of being re-derived here.
 -- ============================================================
 
 with sales as (
 
-    select
-        *,
-        case
-            when department_code = '75' then 'Paris'
-            else 'Petite couronne'
-        end as zone
-    from {{ ref('stg_dvf_mutations') }}
+    select * from {{ ref('int_dvf_sales_enriched') }}
 
 )
 

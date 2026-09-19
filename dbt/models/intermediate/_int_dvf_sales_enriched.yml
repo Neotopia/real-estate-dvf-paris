@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: int_dvf_sales_enriched
+    description: >
+      {{ doc("int_dvf_sales_enriched") }}
+    columns:
+      - name: mutation_id
+        description: Inherited from stg_dvf_mutations.
+        tests:
+          - not_null
+
+      - name: zone
+        description: Paris vs Petite couronne, derived from department_code via the dvf_zone macro.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Paris", "Petite couronne"]
+
+      - name: surface_bucket
+        description: Size category derived from built_surface_m2 via the dvf_surface_bucket macro.
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - "Studio (< 30 m2)"
+                - "T2 (30-50 m2)"
+                - "T3 (50-70 m2)"
+                - "T4 (70-100 m2)"
+                - "T5+ (100 m2+)"
+
+      - name: sale_month
+        description: Calendar month (1-12) of the sale.
+        tests:
+          - not_null
+
+      - name: sale_quarter
+        description: Calendar quarter (1-4) of the sale.
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - mutation_id
+            - street_number
+            - street_name
+            - built_surface_m2
